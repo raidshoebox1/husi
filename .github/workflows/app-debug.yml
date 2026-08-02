@@ -51,16 +51,19 @@ jobs:
         if: always()
         continue-on-error: true
         run: |
-          ./gradlew :composeApp:generateComposeResClass --no-daemon 2>&1 | tail -5
-          echo "=== generated Res kt files ==="
-          find composeApp/build -name '*.kt' -path '*generated*' 2>/dev/null | head
-          echo "=== search accessors ==="
-          for f in $(find composeApp/build -name '*.kt' -path '*generated*' 2>/dev/null); do
-            if grep -qE 'easytier_settings|easytier_enable|arrow_back' "$f"; then
-              echo "--- $f ---"
-              grep -nE 'easytier_settings|easytier_enable|arrow_back|easytier_status_running|easytier_start_failed' "$f" | head -20
-            fi
-          done
+          ./gradlew :composeApp:generateResourceAccessorsForCommonMain :composeApp:generateResourceAccessorsForAndroidMain :composeApp:generateComposeResClass --no-daemon 2>&1 | tail -5
+          echo "=== all files under build/generated (sample) ==="
+          find composeApp/build/generated -type f 2>/dev/null | head -60
+          echo "=== any Res*.kt anywhere in build ==="
+          find composeApp/build -name 'Res.kt' -o -name '*ResAccessor*' 2>/dev/null | head
+          echo "=== whole-tree grep easytier/arrow_back ==="
+          grep -rn 'easytier_settings\|easytier_enable\|arrow_back' composeApp/build/generated composeApp/build/generatedSource 2>/dev/null | head -30
+          echo "=== grep whole build for arrow_back accessor ==="
+          grep -rln 'val arrow_back\|front/arrow_back\|drawable/arrow_back' composeApp/build/generated 2>/dev/null | head
+          echo "=== Res.kt (first 80 lines) ==="
+          f=$(find composeApp/build -name 'Res.kt' 2>/dev/null | head -1)
+          echo "file: $f"
+          sed -n '1,80p' "$f"
       - name: Build Android app (debug)
         env:
           ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
