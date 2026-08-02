@@ -45,6 +45,7 @@ import fr.husi.compose.paddingExceptBottom
 import fr.husi.database.DataStore
 import fr.husi.repository.resolveRepository
 import fr.husi.resources.Res
+import fr.husi.resources.arrow_back
 import fr.husi.resources.easytier_clear_logs
 import fr.husi.resources.easytier_discovered_cidrs
 import fr.husi.resources.easytier_enable

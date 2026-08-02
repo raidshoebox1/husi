@@ -139,6 +139,12 @@ import fr.husi.resources.dns_hosts
 import fr.husi.resources.domain_strategy_for_direct
 import fr.husi.resources.domain_strategy_for_server
 import fr.husi.resources.download
+import fr.husi.resources.easytier_enable
+import fr.husi.resources.easytier_enable_summary
+import fr.husi.resources.easytier_settings
+import fr.husi.resources.easytier_status_disabled
+import fr.husi.resources.easytier_status_running
+import fr.husi.resources.easytier_status_stopped
 import fr.husi.resources.ecg
 import fr.husi.resources.emoji_emotions
 import fr.husi.resources.enable
