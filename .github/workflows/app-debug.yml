@@ -47,6 +47,20 @@ jobs:
         run: make libcore_android
       - name: Generate about libraries metadata
         run: make aboutlibraries_go aboutlibraries_android
+      - name: Diagnose generated resources
+        if: always()
+        continue-on-error: true
+        run: |
+          ./gradlew :composeApp:generateComposeResClass --no-daemon 2>&1 | tail -5
+          echo "=== generated Res kt files ==="
+          find composeApp/build -name '*.kt' -path '*generated*' 2>/dev/null | head
+          echo "=== search accessors ==="
+          for f in $(find composeApp/build -name '*.kt' -path '*generated*' 2>/dev/null); do
+            if grep -qE 'easytier_settings|easytier_enable|arrow_back' "$f"; then
+              echo "--- $f ---"
+              grep -nE 'easytier_settings|easytier_enable|arrow_back|easytier_status_running|easytier_start_failed' "$f" | head -20
+            fi
+          done
       - name: Build Android app (debug)
         env:
           ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
