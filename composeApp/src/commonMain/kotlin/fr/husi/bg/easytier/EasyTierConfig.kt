@@ -20,7 +20,7 @@ data class EasyTierConfig(
         if (hostname.isNotBlank()) {
             sb.appendLine("hostname = \"${escapeToml(hostname)}\"")
         }
-        sb.appendLine("socks5_portal = \"socks5://127.0.0.1:$socks5Port\"")
+        sb.appendLine("socks5_proxy = \"socks5://127.0.0.1:$socks5Port\"")
         if (virtualIp.isNotBlank()) {
             sb.appendLine("ipv4 = \"${escapeToml(virtualIp)}\"")
         }
