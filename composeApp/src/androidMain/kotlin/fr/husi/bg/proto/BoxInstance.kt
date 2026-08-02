@@ -2,6 +2,7 @@ package fr.husi.bg.proto
 
 import fr.husi.bg.AbstractInstance
 import fr.husi.bg.GuardedProcessPool
+import fr.husi.bg.easytier.EasyTierManager
 import fr.husi.bg.initPlugins
 import fr.husi.bg.launchPlugins
 import fr.husi.database.ProxyEntity
@@ -44,6 +45,7 @@ abstract class BoxInstance(
 
     open suspend fun init(isVPN: Boolean) {
         this.isVPN = isVPN
+        EasyTierManager.start()
         buildConfig()
         pluginConfigs.putAll(initPlugins(config, isVPN, cacheFiles))
         loadConfig()
@@ -64,28 +66,32 @@ abstract class BoxInstance(
     @OptIn(DelicateCoroutinesApi::class)
     @Suppress("EXPERIMENTAL_API_USAGE")
     override fun close() {
-        for (instance in externalInstances.values) {
-            runCatching {
-                instance.close()
-            }
-        }
-
-        cacheFiles.removeAll { it.delete(); true }
-
-        if (::processes.isInitialized) processes.close(GlobalScope + Dispatchers.IO)
-
-        if (resolveRepository().boxService?.hasInstance() == true) {
-            try {
-                resolveRepository().boxService!!.stopInstance()
-            } catch (e: Exception) {
-                Logs.w(e)
-                // Kill the process if it is not closed properly to clean exist inbound listeners.
-                // Do not kill in main process, whose test not starts any listener.
-                if (!resolveRepository().isMainProcess && e.readableMessage.contains("sing-box did not close in time")) runOnDefaultDispatcher {
-                    delay(500) // Wait for error handling
-                    exitProcess(0)
+        try {
+            for (instance in externalInstances.values) {
+                runCatching {
+                    instance.close()
                 }
             }
+
+            cacheFiles.removeAll { it.delete(); true }
+
+            if (::processes.isInitialized) processes.close(GlobalScope + Dispatchers.IO)
+
+            if (resolveRepository().boxService?.hasInstance() == true) {
+                try {
+                    resolveRepository().boxService!!.stopInstance()
+                } catch (e: Exception) {
+                    Logs.w(e)
+                    // Kill the process if it is not closed properly to clean exist inbound listeners.
+                    // Do not kill in main process, whose test not starts any listener.
+                    if (!resolveRepository().isMainProcess && e.readableMessage.contains("sing-box did not close in time")) runOnDefaultDispatcher {
+                        delay(500) // Wait for error handling
+                        exitProcess(0)
+                    }
+                }
+            }
+        } finally {
+            EasyTierManager.stop()
         }
     }
 

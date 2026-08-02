@@ -849,4 +849,34 @@
     <string name="ipv6" translatable="false">IPv6</string>
     <string name="connected_since">Connected since</string>
     <string name="openconnect_auth_channel">OpenConnect Authentication</string>
+
+    <!-- EasyTier -->
+    <string name="action_easytier" translatable="false">EasyTier</string>
+    <string name="easytier_settings" translatable="false">EasyTier Settings</string>
+    <string name="easytier_enable">Enable EasyTier</string>
+    <string name="easytier_enable_summary">Run EasyTier mesh VPN alongside the proxy to route mesh network traffic</string>
+    <string name="easytier_network_name">Network Name</string>
+    <string name="easytier_network_secret">Network Secret</string>
+    <string name="easytier_hostname">Hostname</string>
+    <string name="easytier_virtual_ip">Virtual IP (optional)</string>
+    <string name="easytier_peers">Peers (one per line)</string>
+    <string name="easytier_listeners">Listeners (one per line)</string>
+    <string name="easytier_socks5_port">SOCKS5 Port</string>
+    <string name="easytier_rpc_port">RPC Port</string>
+    <string name="easytier_no_tun">No TUN Mode</string>
+    <string name="easytier_no_tun_summary">Run without TUN device (SOCKS5 only). Recommended for proxy integration.</string>
+    <string name="easytier_mtu">MTU (0 = default)</string>
+    <string name="easytier_log_level">Log Level</string>
+    <string name="easytier_status">Status</string>
+    <string name="easytier_status_running">Running</string>
+    <string name="easytier_status_stopped">Stopped</string>
+    <string name="easytier_status_disabled">Disabled</string>
+    <string name="easytier_started">EasyTier started</string>
+    <string name="easytier_start_failed">Failed to start: %1$s</string>
+    <string name="easytier_stopped">EasyTier stopped</string>
+    <string name="easytier_test_connection">Test</string>
+    <string name="easytier_logs">Logs</string>
+    <string name="easytier_clear_logs">Clear</string>
+    <string name="easytier_network_info">Network Info</string>
+    <string name="easytier_discovered_cidrs">Discovered CIDRs</string>
 </resources>

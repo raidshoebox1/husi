@@ -61,6 +61,7 @@ import fr.husi.TunImplementation
 import fr.husi.bg.BackendState
 import fr.husi.bg.Executable
 import fr.husi.bg.ServiceState
+import fr.husi.bg.easytier.EasyTierManager
 import fr.husi.compose.BoxedVerticalScrollbar
 import fr.husi.compose.DurationTextField
 import fr.husi.compose.HostTextField
@@ -264,6 +265,7 @@ fun SettingsScreen(
     mainViewModel: MainViewModel,
     onDrawerClick: () -> Unit,
     openAppManager: () -> Unit,
+    onOpenEasyTierSettings: () -> Unit,
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val windowInsets = WindowInsets.safeDrawing
@@ -455,6 +457,13 @@ fun SettingsScreen(
                         NtpSettingsGroup(
                             needReload = { needReload() },
                             ntpEnableState = ntpEnableState,
+                        )
+                    }
+
+                    item { PreferenceCategory(text = { Text(stringResource(Res.string.easytier_settings)) }) }
+                    preferenceGroup {
+                        EasyTierSettingsGroup(
+                            onOpenSettings = onOpenEasyTierSettings,
                         )
                     }
                 }
@@ -1952,6 +1961,36 @@ private fun NtpSettingsGroup(
     ) { value, onValueChange, onOk ->
         DurationTextField(value, onValueChange, onOk)
     }
+}
+
+@Composable
+private fun EasyTierSettingsGroup(
+    onOpenSettings: () -> Unit,
+) {
+    val easyTierEnabled by DataStore.configurationStore
+        .booleanFlow(Key.EASYTIER_ENABLED, false)
+        .collectAsStateWithLifecycle(false)
+    SwitchPreference(
+        value = easyTierEnabled,
+        onValueChange = {
+            DataStore.easyTierEnabled = it
+        },
+        title = { Text(stringResource(Res.string.easytier_enable)) },
+        summary = { Text(stringResource(Res.string.easytier_enable_summary)) },
+    )
+    PreferenceDivider()
+    val statusRes = if (!easyTierEnabled) {
+        Res.string.easytier_status_disabled
+    } else if (EasyTierManager.isRunning()) {
+        Res.string.easytier_status_running
+    } else {
+        Res.string.easytier_status_stopped
+    }
+    Preference(
+        title = { Text(stringResource(Res.string.easytier_settings)) },
+        summary = { Text(stringResource(statusRes)) },
+        onClick = onOpenSettings,
+    )
 }
 
 @Composable
