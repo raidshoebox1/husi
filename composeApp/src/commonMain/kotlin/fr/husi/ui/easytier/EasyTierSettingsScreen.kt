@@ -79,6 +79,7 @@ import fr.husi.resources.stop
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import me.zhanghai.compose.preference.ProvidePreferenceLocals
 import me.zhanghai.compose.preference.SwitchPreference
 import me.zhanghai.compose.preference.TextFieldPreference
 import org.jetbrains.compose.resources.stringResource
@@ -152,12 +153,13 @@ fun EasyTierSettingsScreen(
         },
         snackbarHost = { SwipeableSnackbarHost(snackbarState) },
     ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .paddingExceptBottom(innerPadding)
-                .verticalScroll(rememberScrollState()),
-        ) {
+        ProvidePreferenceLocals {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .paddingExceptBottom(innerPadding)
+                    .verticalScroll(rememberScrollState()),
+            ) {
             // Enable switch
             SwitchPreference(
                 value = enabled,
@@ -485,6 +487,7 @@ fun EasyTierSettingsScreen(
             }
 
             Spacer(Modifier.height(32.dp))
+            }
         }
     }
 }
