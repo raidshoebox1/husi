@@ -5,6 +5,18 @@ source "buildScript/init/env.sh"
 export AR=$ANDROID_AR
 export LD=$ANDROID_LD
 
+# EasyTier depends on pnet / network-interface, which call getifaddrs/freeifaddrs.
+# Those symbols only exist in Bionic since Android API 24 (the app's minSdk is 24),
+# so link against API 24 instead of the default 21 to resolve them.
+export ANDROID_ARM_CC=${ANDROID_ARM_CC/21-clang/24-clang}
+export ANDROID_ARM_CXX=${ANDROID_ARM_CXX/21-clang/24-clang}
+export ANDROID_ARM64_CC=${ANDROID_ARM64_CC/21-clang/24-clang}
+export ANDROID_ARM64_CXX=${ANDROID_ARM64_CXX/21-clang/24-clang}
+export ANDROID_X86_CC=${ANDROID_X86_CC/21-clang/24-clang}
+export ANDROID_X86_CXX=${ANDROID_X86_CXX/21-clang/24-clang}
+export ANDROID_X86_64_CC=${ANDROID_X86_64_CC/21-clang/24-clang}
+export ANDROID_X86_64_CXX=${ANDROID_X86_64_CXX/21-clang/24-clang}
+
 ndkVer=$(grep Pkg.Revision $ANDROID_NDK_HOME/source.properties)
 ndkVer=${ndkVer#*= }
 ndkVer=${ndkVer%%.*}
