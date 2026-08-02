@@ -131,7 +131,7 @@ object EasyTierManager {
             }
             process = pb.start()
             running = true
-            appendLog("Process started (pid: ${process?.pid()})")
+            appendLog("Process started")
 
             if (!waitForSocks5()) {
                 lastError = "SOCKS5 port ${config.socks5Port} not ready"
