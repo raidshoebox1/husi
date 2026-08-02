@@ -43,6 +43,7 @@ import fr.husi.compose.SwipeableSnackbarHost
 import fr.husi.compose.material3.Text
 import fr.husi.compose.paddingExceptBottom
 import fr.husi.database.DataStore
+import fr.husi.repository.resolveRepository
 import fr.husi.resources.Res
 import fr.husi.resources.easytier_clear_logs
 import fr.husi.resources.easytier_discovered_cidrs
@@ -91,40 +92,40 @@ fun EasyTierSettingsScreen(
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val windowInsets = WindowInsets.safeDrawing
 
-    var enabled by DataStore.configurationStore
+    val enabled by DataStore.configurationStore
         .booleanFlow(Key.EASYTIER_ENABLED, false)
         .collectAsStateWithLifecycle(false)
-    var networkName by DataStore.configurationStore
+    val networkName by DataStore.configurationStore
         .stringFlow(Key.EASYTIER_NETWORK_NAME, "")
         .collectAsStateWithLifecycle("")
-    var networkSecret by DataStore.configurationStore
+    val networkSecret by DataStore.configurationStore
         .stringFlow(Key.EASYTIER_NETWORK_SECRET, "")
         .collectAsStateWithLifecycle("")
-    var hostname by DataStore.configurationStore
+    val hostname by DataStore.configurationStore
         .stringFlow(Key.EASYTIER_HOSTNAME, "")
         .collectAsStateWithLifecycle("")
-    var virtualIp by DataStore.configurationStore
+    val virtualIp by DataStore.configurationStore
         .stringFlow(Key.EASYTIER_VIRTUAL_IP, "")
         .collectAsStateWithLifecycle("")
-    var peers by DataStore.configurationStore
+    val peers by DataStore.configurationStore
         .stringFlow(Key.EASYTIER_PEERS, "")
         .collectAsStateWithLifecycle("")
-    var listeners by DataStore.configurationStore
+    val listeners by DataStore.configurationStore
         .stringFlow(Key.EASYTIER_LISTENERS, "")
         .collectAsStateWithLifecycle("")
-    var socks5Port by DataStore.configurationStore
+    val socks5Port by DataStore.configurationStore
         .intFlow(Key.EASYTIER_SOCKS5_PORT, EasyTierConfig.DEFAULT_SOCKS5_PORT)
         .collectAsStateWithLifecycle(EasyTierConfig.DEFAULT_SOCKS5_PORT)
-    var rpcPort by DataStore.configurationStore
+    val rpcPort by DataStore.configurationStore
         .intFlow(Key.EASYTIER_RPC_PORT, EasyTierConfig.DEFAULT_RPC_PORT)
         .collectAsStateWithLifecycle(EasyTierConfig.DEFAULT_RPC_PORT)
-    var noTun by DataStore.configurationStore
+    val noTun by DataStore.configurationStore
         .booleanFlow(Key.EASYTIER_NO_TUN, true)
         .collectAsStateWithLifecycle(true)
-    var mtu by DataStore.configurationStore
+    val mtu by DataStore.configurationStore
         .intFlow(Key.EASYTIER_MTU, 0)
         .collectAsStateWithLifecycle(0)
-    var logLevel by DataStore.configurationStore
+    val logLevel by DataStore.configurationStore
         .stringFlow(Key.EASYTIER_LOG_LEVEL, "warn")
         .collectAsStateWithLifecycle("warn")
 
@@ -161,7 +162,6 @@ fun EasyTierSettingsScreen(
                 value = enabled,
                 onValueChange = {
                     DataStore.easyTierEnabled = it
-                    enabled = it
                 },
                 title = { Text(stringResource(Res.string.easytier_enable)) },
                 summary = { Text(stringResource(Res.string.easytier_enable_summary)) },
@@ -196,7 +196,6 @@ fun EasyTierSettingsScreen(
                 value = networkName,
                 onValueChange = {
                     DataStore.easyTierNetworkName = it
-                    networkName = it
                 },
                 title = { Text(stringResource(Res.string.easytier_network_name)) },
                 textToValue = { it },
@@ -209,7 +208,6 @@ fun EasyTierSettingsScreen(
                 value = networkSecret,
                 onValueChange = {
                     DataStore.easyTierNetworkSecret = it
-                    networkSecret = it
                 },
                 title = { Text(stringResource(Res.string.easytier_network_secret)) },
                 textToValue = { it },
@@ -222,7 +220,6 @@ fun EasyTierSettingsScreen(
                 value = hostname,
                 onValueChange = {
                     DataStore.easyTierHostname = it
-                    hostname = it
                 },
                 title = { Text(stringResource(Res.string.easytier_hostname)) },
                 textToValue = { it },
@@ -235,7 +232,6 @@ fun EasyTierSettingsScreen(
                 value = virtualIp,
                 onValueChange = {
                     DataStore.easyTierVirtualIp = it
-                    virtualIp = it
                 },
                 title = { Text(stringResource(Res.string.easytier_virtual_ip)) },
                 textToValue = { it },
@@ -248,7 +244,6 @@ fun EasyTierSettingsScreen(
                 value = peers,
                 onValueChange = {
                     DataStore.easyTierPeers = it
-                    peers = it
                 },
                 title = { Text(stringResource(Res.string.easytier_peers)) },
                 textToValue = { it },
@@ -268,7 +263,6 @@ fun EasyTierSettingsScreen(
                 value = listeners,
                 onValueChange = {
                     DataStore.easyTierListeners = it
-                    listeners = it
                 },
                 title = { Text(stringResource(Res.string.easytier_listeners)) },
                 textToValue = { it },
@@ -288,7 +282,6 @@ fun EasyTierSettingsScreen(
                 value = socks5Port,
                 onValueChange = {
                     DataStore.easyTierSocks5Port = it
-                    socks5Port = it
                 },
                 title = { Text(stringResource(Res.string.easytier_socks5_port)) },
                 textToValue = { it.toIntOrNull() ?: EasyTierConfig.DEFAULT_SOCKS5_PORT },
@@ -301,7 +294,6 @@ fun EasyTierSettingsScreen(
                 value = rpcPort,
                 onValueChange = {
                     DataStore.easyTierRpcPort = it
-                    rpcPort = it
                 },
                 title = { Text(stringResource(Res.string.easytier_rpc_port)) },
                 textToValue = { it.toIntOrNull() ?: EasyTierConfig.DEFAULT_RPC_PORT },
@@ -315,7 +307,6 @@ fun EasyTierSettingsScreen(
                 value = noTun,
                 onValueChange = {
                     DataStore.easyTierNoTun = it
-                    noTun = it
                 },
                 title = { Text(stringResource(Res.string.easytier_no_tun)) },
                 summary = { Text(stringResource(Res.string.easytier_no_tun_summary)) },
@@ -327,7 +318,6 @@ fun EasyTierSettingsScreen(
                 value = mtu,
                 onValueChange = {
                     DataStore.easyTierMtu = it
-                    mtu = it
                 },
                 title = { Text(stringResource(Res.string.easytier_mtu)) },
                 textToValue = { it.toIntOrNull() ?: 0 },
@@ -341,7 +331,6 @@ fun EasyTierSettingsScreen(
                 value = logLevel,
                 onValueChange = {
                     DataStore.easyTierLogLevel = it
-                    logLevel = it
                 },
                 title = { Text(stringResource(Res.string.easytier_log_level)) },
                 textToValue = { it },
@@ -364,8 +353,11 @@ fun EasyTierSettingsScreen(
                             networkInfoText = EasyTierManager.getNetworkInfo()
                             logsText = EasyTierManager.getLogs()
                             snackbarState.showSnackbar(
-                                if (result) stringResource(Res.string.easytier_started)
-                                else stringResource(Res.string.easytier_start_failed, EasyTierManager.getLastError() ?: "unknown"),
+                                if (result) resolveRepository().getString(Res.string.easytier_started)
+                                else resolveRepository().getString(
+                                    Res.string.easytier_start_failed,
+                                    EasyTierManager.getLastError() ?: "unknown",
+                                ),
                             )
                         }
                     },
@@ -379,7 +371,7 @@ fun EasyTierSettingsScreen(
                             withContext(Dispatchers.IO) { EasyTierManager.stop() }
                             statusText = EasyTierManager.getStatusText()
                             networkInfoText = EasyTierManager.getNetworkInfo()
-                            snackbarState.showSnackbar(stringResource(Res.string.easytier_stopped))
+                            snackbarState.showSnackbar(resolveRepository().getString(Res.string.easytier_stopped))
                         }
                     },
                 ) {
