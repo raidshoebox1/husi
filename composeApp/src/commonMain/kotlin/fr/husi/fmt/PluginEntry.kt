@@ -1,6 +1,7 @@
 package fr.husi.fmt
 
 import fr.husi.resources.Res
+import fr.husi.resources.action_easytier
 import fr.husi.resources.action_hysteria
 import fr.husi.resources.action_hysteria2
 import fr.husi.resources.action_juicity
@@ -62,7 +63,15 @@ enum class PluginEntry(
             apk = "https://github.com/xchacha20-poly1305/husi/releases?q=plugin-shadowquic",
             binary = "https://github.com/spongebob888/shadowquic/releases",
         ),
-    )
+    ),
+    EasyTier(
+        "easytier-plugin",
+        Res.string.action_easytier,
+        DownloadSource(
+            apk = "https://github.com/EasyTier/EasyTier/releases",
+            binary = "https://github.com/EasyTier/EasyTier/releases",
+        ),
+    ),
     ;
 
     fun getVersion(executable: String): String {
@@ -73,6 +82,7 @@ enum class PluginEntry(
             Hysteria2 -> runCommand(executable, "version")
             Juicity -> runCommand(executable, "--version")
             ShadowQuic -> runCommand(executable, "--version")
+            EasyTier -> runCommand(executable, "--version")
         }
         return when (this) {
             MieruProxy -> parseMieru(output)
@@ -81,6 +91,7 @@ enum class PluginEntry(
             Hysteria2 -> parseHysteria2(output)
             Juicity -> parseJuicity(output)
             ShadowQuic -> parseShadowQuic(output)
+            EasyTier -> parseEasyTier(output)
         }
     }
 
@@ -176,6 +187,17 @@ License GNU AGPLv3 <https://github.com/juicity/juicity/blob/main/LICENSE>
         val line = firstNonBlankLine(output) ?: return "unknown"
         val tokens = tokenize(line)
         return if (tokens.size >= 2) tokens[1] else "unknown"
+    }
+
+    // easytier-core version 2.6.4
+    private fun parseEasyTier(output: String): String {
+        val line = firstNonBlankLine(output) ?: return "unknown"
+        val tokens = tokenize(line)
+        val index = tokens.indexOf("version")
+        if (index >= 0 && index + 1 < tokens.size) {
+            return tokens[index + 1].removePrefix("v")
+        }
+        return "unknown"
     }
 
     private fun firstNonBlankLine(output: String): String? {

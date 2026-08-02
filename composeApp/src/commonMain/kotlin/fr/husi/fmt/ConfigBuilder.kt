@@ -5,6 +5,8 @@ import fr.husi.NetworkInterfaceStrategy
 import fr.husi.RuleProvider
 import fr.husi.TunImplementation
 import fr.husi.bg.VpnConstants
+import fr.husi.bg.easytier.EasyTierConfig
+import fr.husi.bg.easytier.EasyTierManager
 import fr.husi.database.DataStore
 import fr.husi.database.ProfileManager
 import fr.husi.database.ProxyEntity
@@ -1441,6 +1443,31 @@ fun buildConfig(
         }
         route!!.final_ = mainTag
         if (!forTest) dns!!.final_ = TAG_DNS_REMOTE
+
+        // EasyTier mesh routing: inject SOCKS5 outbound and mesh CIDR rules
+        if (!forTest && EasyTierManager.isRunning()) {
+            val easyTierTag = "easytier"
+            val easyTierPort = EasyTierManager.getSocks5Port()
+            if (easyTierPort > 0) {
+                outbounds!!.add(
+                    Outbound_SOCKSOptions().apply {
+                        type = SingBoxOptions.TYPE_SOCKS
+                        tag = easyTierTag
+                        server = LOCALHOST4
+                        server_port = easyTierPort
+                    }.asKxsMap(),
+                )
+                val meshCidrs = EasyTierManager.getMeshCidrs()
+                if (meshCidrs.isNotEmpty()) {
+                    route!!.rules!!.add(
+                        Rule_Default().apply {
+                            ip_cidr = meshCidrs.toMutableList()
+                            outbound = easyTierTag
+                        }.asKxsMap(),
+                    )
+                }
+            }
+        }
 
         // mapping for plugin
         for ((serverInfo, inboundTags) in mappingOverride) {

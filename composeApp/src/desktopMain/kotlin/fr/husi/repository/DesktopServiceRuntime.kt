@@ -6,6 +6,7 @@ import fr.husi.bg.BackendState
 import fr.husi.bg.GuardedProcessPool
 import fr.husi.bg.OpenConnectAuthWatcher
 import fr.husi.bg.ServiceState
+import fr.husi.bg.easytier.EasyTierManager
 import fr.husi.bg.initPlugins
 import fr.husi.bg.launchPlugins
 import fr.husi.bg.proto.TrafficLooper
@@ -93,6 +94,7 @@ internal class DesktopServiceRuntime(
         BackendState.setConnected(false)
 
         try {
+            EasyTierManager.start()
             val config = fr.husi.fmt.buildConfig(profile)
             cacheFiles.clear()
             val isVPN = DataStore.serviceMode == Key.MODE_VPN
@@ -166,29 +168,33 @@ internal class DesktopServiceRuntime(
     }
 
     private suspend fun cleanupLocked() {
-        val service = boxService
-        val pool = processes
-        processes = null
+        try {
+            val service = boxService
+            val pool = processes
+            processes = null
 
-        OpenConnectAuthWatcher.stop()
+            OpenConnectAuthWatcher.stop()
 
-        trafficLooper?.stop()
-        trafficLooper = null
+            trafficLooper?.stop()
+            trafficLooper = null
 
-        pool?.close(scope)
+            pool?.close(scope)
 
-        runCatching {
-            if (service?.hasInstance() == true) {
-                service.stopInstance()
+            runCatching {
+                if (service?.hasInstance() == true) {
+                    service.stopInstance()
+                }
+            }.onFailure {
+                Logs.w(it)
             }
-        }.onFailure {
-            Logs.w(it)
-        }
 
-        cacheFiles.forEach { file ->
-            runCatching { file.delete() }
+            cacheFiles.forEach { file ->
+                runCatching { file.delete() }
+            }
+            cacheFiles.clear()
+        } finally {
+            EasyTierManager.stop()
         }
-        cacheFiles.clear()
     }
 
     private suspend fun handleFatal(throwable: Throwable) {

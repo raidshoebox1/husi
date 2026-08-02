@@ -40,6 +40,7 @@ sealed class NavRoutes : NavKey {
                         subclass(AssetEdit::class, AssetEdit.serializer())
                         subclass(GroupSettings::class, GroupSettings.serializer())
                         subclass(RouteSettings::class, RouteSettings.serializer())
+                        subclass(EasyTierSettings::class, EasyTierSettings.serializer())
                     }
                 }
             }
@@ -151,4 +152,6 @@ sealed class NavRoutes : NavKey {
         val initialState: RouteSettingsUiState? = null,
     ) : NavRoutes()
 
+    @Serializable
+    data object EasyTierSettings : NavRoutes()
 }

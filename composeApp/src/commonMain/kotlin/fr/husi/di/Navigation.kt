@@ -21,6 +21,7 @@ import fr.husi.ui.ProfilePickerController
 import fr.husi.ui.RouteScreen
 import fr.husi.ui.RouteSettingsScreen
 import fr.husi.ui.SettingsScreen
+import fr.husi.ui.easytier.EasyTierSettingsScreen
 import fr.husi.ui.configuration.ConfigurationScreen
 import fr.husi.ui.dashboard.ConnectionDetailScreen
 import fr.husi.ui.dashboard.DashboardScreen
@@ -103,6 +104,16 @@ internal val commonNavigationModule = module {
                 openAppManager = {
                     navigator.navigateTo(NavRoutes.AppManager)
                 },
+                onOpenEasyTierSettings = {
+                    navigator.navigateTo(NavRoutes.EasyTierSettings)
+                },
+            )
+        }
+
+        navigation<NavRoutes.EasyTierSettings> { _ ->
+            val navigator = get<Navigator>()
+            EasyTierSettingsScreen(
+                onBackPress = { navigator.popBackStack() },
             )
         }
 

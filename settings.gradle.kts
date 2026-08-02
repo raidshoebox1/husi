@@ -25,6 +25,7 @@ when {
         include(":plugin:naive")
         include(":plugin:mieru")
         include(":plugin:shadowquic")
+        include(":plugin:easytier")
     }
     buildPlugin == "none" -> {
     }

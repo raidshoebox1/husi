@@ -13,6 +13,9 @@
 [submodule "plugin/shadowquic/src/main/rust/shadowquic"]
 	path = plugin/shadowquic/src/main/rust/shadowquic
 	url = https://github.com/spongebob888/shadowquic.git
+[submodule "plugin/easytier/src/main/rust/easytier"]
+	path = plugin/easytier/src/main/rust/easytier
+	url = https://github.com/EasyTier/EasyTier.git
 [submodule "library/DragDropSwipeLazyColumn"]
 	path = library/DragDropSwipeLazyColumn
 	url = https://github.com/xchacha20-poly1305/DragDropSwipeLazyColumn.git
