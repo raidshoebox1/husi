@@ -24,8 +24,9 @@ data class EasyTierConfig(
         if (virtualIp.isNotBlank()) {
             sb.appendLine("ipv4 = \"${escapeToml(virtualIp)}\"")
         }
-        if (listeners.isNotEmpty()) {
-            sb.appendLine("listeners = [${listeners.joinToString(",") { "\"${escapeToml(it)}\"" }}]")
+        val effectiveListeners = if (listeners.isEmpty()) listOf(DEFAULT_LISTENER) else listeners
+        if (effectiveListeners.isNotEmpty()) {
+            sb.appendLine("listeners = [${effectiveListeners.joinToString(",") { "\"${escapeToml(it)}\"" }}]")
         }
         sb.appendLine("[network_identity]")
         sb.appendLine("network_name = \"${escapeToml(networkName)}\"")
@@ -58,6 +59,9 @@ data class EasyTierConfig(
         const val DEFAULT_INSTANCE_NAME = "husi"
         const val DEFAULT_SOCKS5_PORT = 10852
         const val DEFAULT_RPC_PORT = 15888
+
+        /** EasyTier's standard inbound port; makes this node reachable by mesh peers. */
+        const val DEFAULT_LISTENER = "tcp://0.0.0.0:11010"
 
         val DEFAULT_LAN_CIDRS = listOf(
             "10.0.0.0/8",

@@ -252,8 +252,11 @@ fun EasyTierSettingsScreen(
                 textToValue = { it },
                 summary = {
                     Text(
-                        if (peers.isBlank()) stringResource(Res.string.not_set)
-                        else peers.lines().joinToString(", "),
+                        if (peers.isBlank()) {
+                            "e.g. tcp://192.168.1.10:11010 (required to join a network)"
+                        } else {
+                            peers.lines().joinToString(", ")
+                        },
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
                     )
@@ -271,7 +274,7 @@ fun EasyTierSettingsScreen(
                 textToValue = { it },
                 summary = {
                     Text(
-                        if (listeners.isBlank()) stringResource(Res.string.not_set)
+                        if (listeners.isBlank()) EasyTierConfig.DEFAULT_LISTENER
                         else listeners.lines().joinToString(", "),
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis,

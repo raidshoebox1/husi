@@ -70,6 +70,15 @@ object EasyTierManager {
         sb.appendLine("Instance: ${DataStore.easyTierNetworkName}")
         sb.appendLine("SOCKS5: 127.0.0.1:$socks5Port")
         sb.appendLine("RPC: 127.0.0.1:$rpcPort")
+        val listeners = DataStore.easyTierListeners.split("\n").map { it.trim() }.filter { it.isNotBlank() }
+        sb.appendLine("Listeners: ${if (listeners.isEmpty()) EasyTierConfig.DEFAULT_LISTENER else listeners.joinToString(", ")}")
+        val peers = DataStore.easyTierPeers.split("\n").map { it.trim() }.filter { it.isNotBlank() }
+        sb.appendLine("Peers: ${if (peers.isEmpty()) "(none)" else peers.joinToString(", ")}")
+        if (peers.isEmpty()) {
+            sb.appendLine("Hint: EasyTier needs a reachable seed to connect.")
+            sb.appendLine("Add at least one peer (e.g. tcp://<other-node-ip>:11010),")
+            sb.appendLine("or share this node's listener address with other devices.")
+        }
         if (meshCidrs.isNotEmpty()) {
             sb.appendLine("Discovered CIDRs:")
             meshCidrs.forEach { sb.appendLine("  $it") }
