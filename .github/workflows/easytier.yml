@@ -31,7 +31,7 @@ jobs:
       - name: Setup Rust toolchain
         uses: dtolnay/rust-toolchain@stable
         with:
-          channel: '1.95'
+          toolchain: '1.95'
           targets: aarch64-linux-android, armv7-linux-androideabi, i686-linux-android, x86_64-linux-android
       - name: Cache Rust build
         uses: Swatinem/rust-cache@v2
