@@ -265,6 +265,6 @@ object DataStore {
     var easyTierRpcPort by configurationStore.int(Key.EASYTIER_RPC_PORT) { EasyTierConfig.DEFAULT_RPC_PORT }
     var easyTierNoTun by configurationStore.boolean(Key.EASYTIER_NO_TUN) { true }
     var easyTierMtu by configurationStore.int(Key.EASYTIER_MTU) { 0 }
-    var easyTierLogLevel by configurationStore.string(Key.EASYTIER_LOG_LEVEL) { "warn" }
+    var easyTierLogLevel by configurationStore.string(Key.EASYTIER_LOG_LEVEL) { "info" }
 
 }

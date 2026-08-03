@@ -12,7 +12,7 @@ data class EasyTierConfig(
     var rpcPort: Int = DEFAULT_RPC_PORT,
     var noTun: Boolean = true,
     var mtu: Int = 0,
-    var logLevel: String = "warn",
+    var logLevel: String = "info",
 ) {
     fun toToml(): String {
         val sb = StringBuilder()

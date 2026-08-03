@@ -7,7 +7,11 @@ import fr.husi.repository.resolveRepository
 import java.io.File
 import java.net.InetSocketAddress
 import java.net.Socket
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 object EasyTierManager {
 
@@ -31,10 +35,9 @@ object EasyTierManager {
     private var configFile: File? = null
 
     @Volatile
-    private var logFile: File? = null
-
-    @Volatile
     private var process: Process? = null
+
+    private var logReaderJob: Job? = null
 
     private val logBuffer = StringBuffer()
 
@@ -123,7 +126,6 @@ object EasyTierManager {
         configFile = File(cacheDir, "easytier_$ts.toml").also {
             it.writeText(config.toToml())
         }
-        logFile = File(cacheDir, "easytier_$ts.log")
 
         val args = config.toCliArgs(configFile!!.absolutePath).toMutableList()
         args.add(0, executable)
@@ -134,13 +136,11 @@ object EasyTierManager {
         return try {
             val pb = ProcessBuilder(args).apply {
                 redirectErrorStream(true)
-                if (logFile != null) {
-                    redirectOutput(ProcessBuilder.Redirect.appendTo(logFile))
-                }
             }
             process = pb.start()
             running = true
             appendLog("Process started")
+            streamProcessOutput()
 
             if (!waitForSocks5()) {
                 lastError = "SOCKS5 port ${config.socks5Port} not ready"
@@ -164,6 +164,28 @@ object EasyTierManager {
     }
 
     /**
+     * Stream easytier-core's stderr/stdout into the in-app log buffer so the
+     * user (and developer) can see Easytier's own connection/diagnostic logs.
+     */
+    private fun streamProcessOutput() {
+        val proc = process ?: return
+        val reader = proc.inputStream.bufferedReader()
+        logReaderJob = GlobalScope.launch(Dispatchers.IO) {
+            try {
+                for (line in reader.lineSequence()) {
+                    if (line.isNotBlank()) {
+                        appendRawLog(line)
+                    }
+                }
+            } catch (_: Exception) {
+                // stream closed
+            } finally {
+                runCatching { reader.close() }
+            }
+        }
+    }
+
+    /**
      * Stop the EasyTier process.
      */
     fun stop() {
@@ -172,6 +194,8 @@ object EasyTierManager {
 
     private fun stopInternal() {
         running = false
+        logReaderJob?.cancel()
+        logReaderJob = null
         process?.let {
             try {
                 it.destroy()
@@ -184,7 +208,6 @@ object EasyTierManager {
         }
         process = null
         configFile?.let { it.delete(); configFile = null }
-        logFile?.let { it.delete(); logFile = null }
         meshCidrs = emptyList()
         socks5Port = 0
         rpcPort = 0
@@ -230,6 +253,12 @@ object EasyTierManager {
             .format(java.util.Date())
         logBuffer.appendLine("[$timestamp] $message")
         Logs.d("[$TAG] $message")
+    }
+
+    @Synchronized
+    private fun appendRawLog(line: String) {
+        logBuffer.appendLine("easytier: $line")
+        Logs.d("[$TAG] easytier: $line")
     }
 
     private fun buildConfigFromDataStore(): EasyTierConfig {
