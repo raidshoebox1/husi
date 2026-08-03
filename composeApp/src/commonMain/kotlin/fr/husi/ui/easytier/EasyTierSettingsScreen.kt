@@ -128,8 +128,8 @@ fun EasyTierSettingsScreen(
         .intFlow(Key.EASYTIER_MTU, 0)
         .collectAsStateWithLifecycle(0)
     val logLevel by DataStore.configurationStore
-        .stringFlow(Key.EASYTIER_LOG_LEVEL, "warn")
-        .collectAsStateWithLifecycle("warn")
+        .stringFlow(Key.EASYTIER_LOG_LEVEL, "info")
+        .collectAsStateWithLifecycle("info")
 
     var statusText by remember { mutableStateOf(EasyTierManager.getStatusText()) }
     var logsText by remember { mutableStateOf(EasyTierManager.getLogs()) }
