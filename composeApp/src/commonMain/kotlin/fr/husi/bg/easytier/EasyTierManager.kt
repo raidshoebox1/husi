@@ -109,7 +109,17 @@ object EasyTierManager {
 
     /**
      * Start the EasyTier process.
-     * Must be called before buildConfig() so that CIDRs are available.
+     *
+     * Must be called before buildConfig() so that the SOCKS5 port is
+     * available for the injected SOCKS5 outbound.
+     *
+     * If the SOCKS5 port is already open (e.g. EasyTier was started by
+     * the test button in the UI process), this adopts the existing
+     * instance's state instead of launching a second process that would
+     * fail to bind. This is critical for the Android multi-process
+     * model where the UI and :bg processes each have their own
+     * EasyTierManager singleton.
+     *
      * Returns true if EasyTier started successfully or was already running.
      */
     suspend fun start(): Boolean {
@@ -122,6 +132,18 @@ object EasyTierManager {
         val config = buildConfigFromDataStore()
         socks5Port = config.socks5Port
         rpcPort = config.rpcPort
+
+        // If EasyTier is already running in another process (e.g. started
+        // via the UI test button), the SOCKS5 port will already be open.
+        // Adopt the existing instance's state instead of launching a
+        // second process that would fail to bind.
+        if (isSocks5PortReady(config.socks5Port)) {
+            running = true
+            meshCidrs = EasyTierConfig.DEFAULT_LAN_CIDRS
+            appendLog("EasyTier already running (SOCKS5 port ${config.socks5Port} in use)")
+            Logs.i("[$TAG] Adopted existing EasyTier instance on port ${config.socks5Port}")
+            return true
+        }
 
         val executable = try {
             PluginManager.init("easytier-plugin")?.path
@@ -247,6 +269,22 @@ object EasyTierManager {
             }
         }
         return false
+    }
+
+    /**
+     * Non-blocking check whether the SOCKS5 port is already open.
+     * Used to detect an EasyTier instance started by another process
+     * (e.g. the UI test button) so we don't launch a duplicate.
+     */
+    private fun isSocks5PortReady(port: Int): Boolean {
+        return try {
+            Socket().use { socket ->
+                socket.connect(InetSocketAddress("127.0.0.1", port), 200)
+                true
+            }
+        } catch (_: Exception) {
+            false
+        }
     }
 
     private suspend fun discoverMeshCidrs(rpcPort: Int): List<String> {

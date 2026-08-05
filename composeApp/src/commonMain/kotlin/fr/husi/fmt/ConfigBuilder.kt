@@ -6,7 +6,6 @@ import fr.husi.RuleProvider
 import fr.husi.TunImplementation
 import fr.husi.bg.VpnConstants
 import fr.husi.bg.easytier.EasyTierConfig
-import fr.husi.bg.easytier.EasyTierManager
 import fr.husi.database.DataStore
 import fr.husi.database.ProfileManager
 import fr.husi.database.ProxyEntity
@@ -95,6 +94,8 @@ import fr.husi.libcore.Libcore
 import fr.husi.logLevelString
 import fr.husi.platform.PlatformInfo
 import fr.husi.repository.resolveRepository
+import java.net.InetSocketAddress
+import java.net.Socket
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.JsonPrimitive
@@ -120,6 +121,13 @@ const val TAG_SERVICE_ANCHOR = "service-anchor"
 
 const val LOCALHOST4 = "127.0.0.1"
 private const val ANCHOR_PORT = 45947
+
+// EasyTier process name on Android. The Rust binary is packaged as
+// libeasytier.so, and Android truncates /proc/<pid>/comm to 15 chars,
+// so "libeasytier.so" (13 chars) fits. Used to route EasyTier's own
+// traffic directly so its mesh peers are reachable through the real
+// network interface instead of the VPN TUN.
+const val EASYTIER_PROCESS_NAME = "libeasytier.so"
 
 // For a certain version schema, maybe we should use [typebox](https://github.com/jiang-zhexin/typebox) ?
 const val CONFIG_SCHEMA_URL = "https://sing-box.sagernet.org/schema.json"
@@ -1444,11 +1452,38 @@ fun buildConfig(
         route!!.final_ = mainTag
         if (!forTest) dns!!.final_ = TAG_DNS_REMOTE
 
-        // EasyTier mesh routing: inject SOCKS5 outbound and mesh CIDR rules
-        if (!forTest && EasyTierManager.isRunning()) {
+        // EasyTier mesh routing: when EasyTier is enabled and its SOCKS5
+        // port is reachable, inject a SOCKS5 outbound for mesh CIDRs and
+        // route EasyTier's own process traffic directly so its mesh peers
+        // are reachable through the real network interface instead of the
+        // VPN TUN.
+        //
+        // We probe the SOCKS5 port directly instead of consulting
+        // EasyTierManager.isRunning() because the manager's in-memory
+        // state is per-process and not shared between the UI and :bg
+        // processes on Android.
+        if (!forTest && DataStore.easyTierEnabled && DataStore.easyTierNetworkName.isNotBlank()) {
             val easyTierTag = "easytier"
-            val easyTierPort = EasyTierManager.getSocks5Port()
-            if (easyTierPort > 0) {
+            val easyTierPort = DataStore.easyTierSocks5Port
+            if (easyTierPort > 0 && isLocalPortOpen(LOCALHOST4, easyTierPort)) {
+                // Route EasyTier process traffic directly to bypass VPN TUN.
+                // Prepend so it matches before other rules. Without this,
+                // EasyTier's peer connections and listener replies would be
+                // captured by the TUN and routed through the proxy, breaking
+                // mesh connectivity.
+                route!!.rules!!.add(
+                    0,
+                    Rule_Default().apply {
+                        process_name = mutableListOf(EASYTIER_PROCESS_NAME)
+                        outbound = TAG_DIRECT
+                    }.asKxsMap(),
+                )
+                // Enable process matching only when EasyTier is active;
+                // this avoids the per-connection /proc lookup overhead in
+                // the normal VPN-only case.
+                route!!.find_process = true
+
+                // SOCKS5 outbound for mesh CIDR routing
                 outbounds!!.add(
                     Outbound_SOCKSOptions().apply {
                         type = SingBoxOptions.TYPE_SOCKS
@@ -1457,7 +1492,7 @@ fun buildConfig(
                         server_port = easyTierPort
                     }.asKxsMap(),
                 )
-                val meshCidrs = EasyTierManager.getMeshCidrs()
+                val meshCidrs = EasyTierConfig.DEFAULT_LAN_CIDRS
                 if (meshCidrs.isNotEmpty()) {
                     route!!.rules!!.add(
                         Rule_Default().apply {
@@ -1553,4 +1588,23 @@ fun mapNetworkInterfaceStrategy(strategy: Int): String = when (strategy) {
     NetworkInterfaceStrategy.HYBRID -> SingBoxOptions.STRATEGY_HYBRID
     NetworkInterfaceStrategy.FALLBACK -> SingBoxOptions.STRATEGY_FALLBACK
     else -> throw IllegalStateException()
+}
+
+/**
+ * Non-blocking check whether a local TCP port is open.
+ *
+ * Used by [buildConfig] to detect whether EasyTier is already running
+ * (e.g. started by the UI test button in another process) instead of
+ * relying on EasyTierManager's in-memory state, which is per-process
+ * and not shared between the UI and :bg processes on Android.
+ */
+private fun isLocalPortOpen(host: String, port: Int): Boolean {
+    return try {
+        Socket().use { socket ->
+            socket.connect(InetSocketAddress(host, port), 200)
+            true
+        }
+    } catch (_: Exception) {
+        false
+    }
 }
