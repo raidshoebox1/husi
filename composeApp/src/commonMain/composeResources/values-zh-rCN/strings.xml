@@ -791,4 +791,31 @@
     <string name="ipv6" translatable="false">IPv6</string>
     <string name="connected_since">连接时间</string>
     <string name="openconnect_auth_channel">OpenConnect 身份验证</string>
+
+    <!-- EasyTier -->
+    <string name="easytier_enable">启用 EasyTier</string>
+    <string name="easytier_enable_summary">在代理运行时同时运行 EasyTier mesh VPN，将 mesh 网络流量路由到代理</string>
+    <string name="easytier_network_name">网络名称</string>
+    <string name="easytier_network_secret">网络密钥</string>
+    <string name="easytier_hostname">主机名</string>
+    <string name="easytier_virtual_ip">虚拟 IP（可选）</string>
+    <string name="easytier_peers">对等节点（每行一个）</string>
+    <string name="easytier_listeners">监听器（每行一个）</string>
+    <string name="easytier_socks5_port">SOCKS5 端口</string>
+    <string name="easytier_rpc_port">RPC 端口</string>
+    <string name="easytier_no_tun">无 TUN 模式</string>
+    <string name="easytier_no_tun_summary">不使用 TUN 设备运行（仅 SOCKS5）。推荐用于代理集成。</string>
+    <string name="easytier_mtu">MTU（0 = 默认）</string>
+    <string name="easytier_log_level">日志级别</string>
+    <string name="easytier_status">状态</string>
+    <string name="easytier_status_running">运行中</string>
+    <string name="easytier_status_stopped">已停止</string>
+    <string name="easytier_status_disabled">已禁用</string>
+    <string name="easytier_started">EasyTier 已启动</string>
+    <string name="easytier_start_failed">启动失败：%1$s</string>
+    <string name="easytier_stopped">EasyTier 已停止</string>
+    <string name="easytier_logs">日志</string>
+    <string name="easytier_clear_logs">清除</string>
+    <string name="easytier_network_info">网络信息</string>
+    <string name="easytier_discovered_cidrs">发现的 CIDR</string>
 </resources>
