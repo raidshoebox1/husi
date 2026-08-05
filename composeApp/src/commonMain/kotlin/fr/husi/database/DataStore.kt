@@ -12,6 +12,7 @@ import fr.husi.SPEED_TEST_URL
 import fr.husi.TrafficSortMode
 import fr.husi.TunImplementation
 import fr.husi.bg.ServiceState
+import fr.husi.bg.easytier.EasyTierConfig
 import fr.husi.compose.theme.DEFAULT
 import fr.husi.database.preference.DataStorePreferenceDataStore
 import fr.husi.database.preference.createConfigurationDataStore
@@ -251,5 +252,19 @@ object DataStore {
     var anytlsCustomVersion by configurationStore.string(Key.ANYTLS_CUSTOM_VERSION)
 
     var rulesFirstCreate by configurationStore.boolean(Key.RULES_FIRST_CREATE)
+
+    // EasyTier
+    var easyTierEnabled by configurationStore.boolean(Key.EASYTIER_ENABLED) { false }
+    var easyTierNetworkName by configurationStore.string(Key.EASYTIER_NETWORK_NAME) { "" }
+    var easyTierNetworkSecret by configurationStore.string(Key.EASYTIER_NETWORK_SECRET) { "" }
+    var easyTierHostname by configurationStore.string(Key.EASYTIER_HOSTNAME) { "" }
+    var easyTierVirtualIp by configurationStore.string(Key.EASYTIER_VIRTUAL_IP) { "" }
+    var easyTierPeers by configurationStore.string(Key.EASYTIER_PEERS) { "" }
+    var easyTierListeners by configurationStore.string(Key.EASYTIER_LISTENERS) { "" }
+    var easyTierSocks5Port by configurationStore.int(Key.EASYTIER_SOCKS5_PORT) { EasyTierConfig.DEFAULT_SOCKS5_PORT }
+    var easyTierRpcPort by configurationStore.int(Key.EASYTIER_RPC_PORT) { EasyTierConfig.DEFAULT_RPC_PORT }
+    var easyTierNoTun by configurationStore.boolean(Key.EASYTIER_NO_TUN) { true }
+    var easyTierMtu by configurationStore.int(Key.EASYTIER_MTU) { 0 }
+    var easyTierLogLevel by configurationStore.string(Key.EASYTIER_LOG_LEVEL) { "info" }
 
 }

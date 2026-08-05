@@ -1,0 +1,56 @@
+name: Plugin EasyTier
+
+on:
+  push:
+    tags:
+      - 'plugin-easytier-v*'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-26.04
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v7
+        with:
+          submodules: recursive
+      - uses: ./.github/actions/load-build-versions
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: gradle
+      - name: Setup Android NDK
+        id: setup-ndk
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: ${{ env.ANDROID_NDK_VERSION }}
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: '1.95'
+          targets: aarch64-linux-android, armv7-linux-androideabi, i686-linux-android, x86_64-linux-android
+      - name: Cache Rust build
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: plugin/easytier/src/main/rust/easytier
+      - name: Install protobuf compiler
+        run: sudo apt-get update && sudo apt-get install -y protobuf-compiler
+      - name: Native build
+        env:
+          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+        run: ./run plugin easytier
+      - name: Gradle Build (debug)
+        env:
+          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+          BUILD_PLUGIN: easytier
+          SKIP_BUILD: on
+        run: ./gradlew :plugin:easytier:assembleFossDebug
+      - uses: actions/upload-artifact@v7
+        with:
+          name: plugin-easytier
+          path: plugin/easytier/build/outputs/apk/**/*.apk
+          if-no-files-found: error

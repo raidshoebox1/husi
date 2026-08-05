@@ -133,6 +133,20 @@ object Key {
 
     const val RULES_FIRST_CREATE = "rulesFirstCreate"
 
+    // EasyTier Settings
+    const val EASYTIER_ENABLED = "easytierEnabled"
+    const val EASYTIER_NETWORK_NAME = "easytierNetworkName"
+    const val EASYTIER_NETWORK_SECRET = "easytierNetworkSecret"
+    const val EASYTIER_HOSTNAME = "easytierHostname"
+    const val EASYTIER_VIRTUAL_IP = "easytierVirtualIp"
+    const val EASYTIER_PEERS = "easytierPeers"
+    const val EASYTIER_LISTENERS = "easytierListeners"
+    const val EASYTIER_SOCKS5_PORT = "easytierSocks5Port"
+    const val EASYTIER_RPC_PORT = "easytierRpcPort"
+    const val EASYTIER_NO_TUN = "easytierNoTun"
+    const val EASYTIER_MTU = "easytierMtu"
+    const val EASYTIER_LOG_LEVEL = "easytierLogLevel"
+
 }
 
 object AlertType {

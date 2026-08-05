@@ -61,6 +61,7 @@ actual object PluginManager {
             "naive-plugin" -> soIfExist("libnaive.so")
             "mieru-plugin" -> soIfExist("libmieru.so")
             "shadowquic-plugin" -> soIfExist("libshadowquic.so")
+            "easytier-plugin" -> soIfExist("libeasytier.so")
             else -> null
         }
     }
