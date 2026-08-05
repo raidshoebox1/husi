@@ -1,13 +1,14 @@
 name: App Debug APK
 
 on:
-  push:
-    branches:
-      - 'dev*'
   workflow_dispatch:
 
 permissions:
   contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   android:
