@@ -877,7 +877,6 @@
     <string name="easytier_started">EasyTier started</string>
     <string name="easytier_start_failed">Failed to start: %1$s</string>
     <string name="easytier_stopped">EasyTier stopped</string>
-    <string name="easytier_test_connection">Test</string>
     <string name="easytier_logs">Logs</string>
     <string name="easytier_clear_logs">Clear</string>
     <string name="easytier_network_info">Network Info</string>

@@ -98,7 +98,9 @@ object EasyTierManager {
         }
         if (meshCidrs.isNotEmpty()) {
             sb.appendLine("Discovered CIDRs:")
-            meshCidrs.forEach { sb.appendLine("  $it") }
+            for (cidr in meshCidrs) {
+                sb.appendLine("  $cidr")
+            }
         } else {
             sb.appendLine("CIDRs: (none discovered)")
         }

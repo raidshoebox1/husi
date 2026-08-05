@@ -1,8 +1,5 @@
 package fr.husi.bg.easytier
 
-import java.net.InetSocketAddress
-import java.net.Socket
-
 /**
  * Client for querying the EasyTier RPC Portal (default: 127.0.0.1:15888).
  *
@@ -15,10 +12,6 @@ import java.net.Socket
  */
 class EasyTierRpcClient(private val rpcPort: Int) {
 
-    companion object {
-        private const val CONNECT_TIMEOUT_MS = 1000
-    }
-
     /**
      * Collect mesh CIDRs from the running EasyTier instance.
      *
@@ -30,19 +23,5 @@ class EasyTierRpcClient(private val rpcPort: Int) {
         // TODO: Implement RPC Portal query to get actual mesh CIDRs.
         // For now, return empty list so the caller uses default LAN CIDRs.
         return emptyList()
-    }
-
-    /**
-     * Check if the RPC Portal is reachable.
-     */
-    fun isReachable(): Boolean {
-        return try {
-            Socket().use { socket ->
-                socket.connect(InetSocketAddress("127.0.0.1", rpcPort), CONNECT_TIMEOUT_MS)
-                true
-            }
-        } catch (_: Exception) {
-            false
-        }
     }
 }
