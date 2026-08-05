@@ -7,9 +7,10 @@ import fr.husi.repository.resolveRepository
 import java.io.File
 import java.net.InetSocketAddress
 import java.net.Socket
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -18,6 +19,19 @@ object EasyTierManager {
     private const val TAG = "EasyTier"
     private const val SOCKS5_PROBE_RETRIES = 10
     private const val SOCKS5_PROBE_INTERVAL_MS = 500L
+
+    /**
+     * Private scope for the log-streaming coroutine. Owned by the
+     * EasyTierManager singleton, so it lives for the process lifetime;
+     * individual log-reader jobs are cancelled in [stopInternal].
+     *
+     * Note: this is a single-process object. On Android the UI and :bg
+     * processes each have their own instance, so [isRunning] only reflects
+     * the calling process's view. The :bg instance is the authoritative
+     * one used by ConfigBuilder; the UI instance is only meaningful on
+     * desktop.
+     */
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     @Volatile
     private var running = false
@@ -39,7 +53,7 @@ object EasyTierManager {
 
     private var logReaderJob: Job? = null
 
-    private val logBuffer = StringBuffer()
+    private val logBuffer = StringBuilder()
 
     @Volatile
     private var lastError: String? = null
@@ -170,7 +184,7 @@ object EasyTierManager {
     private fun streamProcessOutput() {
         val proc = process ?: return
         val reader = proc.inputStream.bufferedReader()
-        logReaderJob = GlobalScope.launch(Dispatchers.IO) {
+        logReaderJob = scope.launch {
             try {
                 for (line in reader.lineSequence()) {
                     if (line.isNotBlank()) {

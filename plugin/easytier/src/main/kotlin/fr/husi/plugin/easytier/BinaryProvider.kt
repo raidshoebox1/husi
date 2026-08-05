@@ -12,7 +12,8 @@ class BinaryProvider : NativePluginProvider() {
         provider.addPath("easytier-plugin", 0b111101101)
     }
 
-    override fun getExecutable() = context!!.applicationInfo.nativeLibraryDir + "/libeasytier.so"
+    override fun getExecutable(): String =
+        File(context!!.applicationInfo.nativeLibraryDir).resolve("libeasytier.so").absolutePath
     override fun openFile(uri: Uri): ParcelFileDescriptor = when (uri.path) {
         "/easytier-plugin" -> ParcelFileDescriptor.open(
             File(getExecutable()),
