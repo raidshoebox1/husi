@@ -56,7 +56,13 @@ jobs:
           ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
           BUILD_PLUGIN: easytier
           SKIP_BUILD: on
-        run: make plugin PLUGIN=easytier
+        run: |
+          if [ -s local.properties ]; then
+            make plugin PLUGIN=easytier
+          else
+            echo "::notice::No signing secrets found, building debug APK"
+            ./gradlew :plugin:easytier:assembleFossDebug --no-daemon
+          fi
       - uses: actions/upload-artifact@v7
         with:
           name: plugin-easytier
